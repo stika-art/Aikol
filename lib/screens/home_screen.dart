@@ -75,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     // SupabaseService.deleteAll(DebtType.owed)
   }
 
-  double get _totalOwed => _debts.where((d) => !d.isPaid).fold(0, (sum, item) => sum + item.amount);
+  double get _totalOwed => _debts.where((d) => !d.isPaid && !d.isDeleted).fold(0, (sum, item) => sum + item.amount);
 
   List<Debt> get _sortedDebts {
     List<Debt> filtered = _debts.where((d) => d.isDeleted == _viewDeleted).toList();
