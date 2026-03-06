@@ -56,5 +56,29 @@ class Debt {
       'is_paid': isPaid,
       'is_deleted': isDeleted,
     };
+  Debt copyWith({
+    String? id,
+    String? userId,
+    String? personName,
+    String? phoneNumber,
+    double? amount,
+    String? description,
+    DateTime? date,
+    DebtType? type,
+    bool? isPaid,
+    bool? isDeleted,
+  }) {
+    return Debt(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      personName: personName ?? this.personName,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      amount: amount ?? this.amount,
+      description: description ?? this.description,
+      date: date ?? this.date,
+      type: type ?? this.type,
+      isPaid: isPaid ?? this.isPaid,
+      isDeleted: isDeleted ?? this.isDeleted,
+    );
   }
 }

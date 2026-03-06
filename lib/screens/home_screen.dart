@@ -95,7 +95,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     } else if (_currentSort == SortType.amountAsc) {
       filtered.sort((a, b) => a.amount.compareTo(b.amount));
     } else {
-      // original (как в списке) - ничего не делаем, так как список уже пришел в нужном порядке
+      // original (как в списке) - соритруем по дате создания (новые выше), 
+      // чтобы воссозданные персонажи как "Дядя Юра" попадали в начало
+      filtered.sort((a, b) => b.date.compareTo(a.date));
     }
     return filtered;
   }
@@ -293,7 +295,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 if (_viewDeleted) {
                   // Восстановление
                   SupabaseService.updateDebt(debt.id, {'is_deleted': false}).catchError((_) {});
-                  setState(() => _debts.remove(debt));
+                  setState(() {
+                    final index = _debts.indexWhere((d) => d.id == debt.id);
+                    if (index != -1) _debts[index] = debt.copyWith(isDeleted: false);
+                  });
                   return true;
                 } else {
                   // Звонок
@@ -308,14 +313,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
             onDismissed: (direction) {
               if (direction == DismissDirection.endToStart) {
+                final bool willBeDeleted = !_viewDeleted;
                 if (_viewDeleted) {
-                  // Удаление из корзины = полное удаление
                   SupabaseService.deleteDebt(debt.id).catchError((_) {});
+                  setState(() => _debts.removeWhere((d) => d.id == debt.id));
                 } else {
-                  // Перемещение в корзину
                   SupabaseService.updateDebt(debt.id, {'is_deleted': true}).catchError((_) {});
+                  setState(() {
+                    final index = _debts.indexWhere((d) => d.id == debt.id);
+                    if (index != -1) _debts[index] = debt.copyWith(isDeleted: true);
+                  });
                 }
-                setState(() => _debts.remove(debt));
               }
             },
             child: InkWell(
