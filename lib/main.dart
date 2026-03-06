@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth_screen.dart';
 import 'services/supabase_service.dart';
@@ -8,6 +9,15 @@ import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF0F0F0F),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
 
   // Инициализация Supabase. 
   // Вставьте ваши реальные данные здесь для облачного хранения.
