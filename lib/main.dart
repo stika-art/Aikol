@@ -34,8 +34,44 @@ void main() async {
   runApp(const DebtlyApp());
 }
 
-class DebtlyApp extends StatelessWidget {
+class DebtlyApp extends StatefulWidget {
   const DebtlyApp({super.key});
+
+  @override
+  State<DebtlyApp> createState() => _DebtlyAppState();
+}
+
+class _DebtlyAppState extends State<DebtlyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Это предотвращает появление "синего цвета" при возврате в приложение
+      _updateSystemUI();
+    }
+  }
+
+  void _updateSystemUI() {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xFF0F0F0F),
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +79,7 @@ class DebtlyApp extends StatelessWidget {
       title: 'Aikol',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
+      themeMode: ThemeMode.dark, // Принудительно темная тема
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
           PointerDeviceKind.mouse,
@@ -77,3 +114,4 @@ class AuthWrapper extends StatelessWidget {
     );
   }
 }
+

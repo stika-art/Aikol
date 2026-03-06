@@ -13,7 +13,14 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
+      primaryColor: primary,
+      canvasColor: background,
       scaffoldBackgroundColor: background,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: background,
+        elevation: 0,
+        centerTitle: true,
+      ),
       colorScheme: const ColorScheme.dark(
         primary: primary,
         secondary: secondary,
@@ -54,3 +61,4 @@ class AppTheme {
     );
   }
 }
+
