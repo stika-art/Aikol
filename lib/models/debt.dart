@@ -56,6 +56,8 @@ class Debt {
       'is_paid': isPaid,
       'is_deleted': isDeleted,
     };
+  }
+
   Debt copyWith({
     String? id,
     String? userId,
