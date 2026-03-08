@@ -31,13 +31,13 @@ class Debt {
     double parsedAmount = double.tryParse(rawAmount.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
 
     return Debt(
-      id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: json['user_id'] ?? '',
+      id: json['id']?.toString() ?? '',
+      userId: json['user_id']?.toString() ?? '',
       personName: json['Имя'] ?? '',
       phoneNumber: json['Телефон'] ?? '',
       amount: parsedAmount,
       description: json['description'] ?? '',
-      date: DateTime.parse(json['date'] ?? DateTime.now().toIso8601String()),
+      date: DateTime.tryParse(json['date'] ?? '') ?? DateTime.now(),
       type: json['type'] == 'owe' ? DebtType.owe : DebtType.owed,
       isPaid: json['is_paid'] ?? false,
       isDeleted: json['is_deleted'] ?? false,

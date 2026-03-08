@@ -294,7 +294,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               if (direction == DismissDirection.startToEnd) {
                 if (_viewDeleted) {
                   // Восстановление
-                  SupabaseService.updateDebt(debt.id, {'is_deleted': false}).catchError((_) {});
+                  SupabaseService.updateDebt(debt.id, {'is_deleted': false}).then((_) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Восстановлено'), backgroundColor: Colors.green),
+                      );
+                    }
+                  }).catchError((e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ошибка восстановления: $e'), backgroundColor: Colors.red),
+                      );
+                    }
+                  });
                   setState(() {
                     final index = _debts.indexWhere((d) => d.id == debt.id);
                     if (index != -1) _debts[index] = debt.copyWith(isDeleted: false);
@@ -315,10 +327,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               if (direction == DismissDirection.endToStart) {
                 final bool willBeDeleted = !_viewDeleted;
                 if (_viewDeleted) {
-                  SupabaseService.deleteDebt(debt.id).catchError((_) {});
+                  SupabaseService.deleteDebt(debt.id).then((_) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Удалено окончательно'), backgroundColor: Colors.red),
+                      );
+                    }
+                  }).catchError((e) {
+                    debugPrint('Delete error: $e');
+                    _loadDebts(); // Reload to fix UI state
+                  });
                   setState(() => _debts.removeWhere((d) => d.id == debt.id));
                 } else {
-                  SupabaseService.updateDebt(debt.id, {'is_deleted': true}).catchError((_) {});
+                  SupabaseService.updateDebt(debt.id, {'is_deleted': true}).then((_) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Перемещено в корзину'), backgroundColor: Colors.orange),
+                      );
+                    }
+                  }).catchError((e) {
+                    debugPrint('Move to trash error: $e');
+                    _loadDebts(); // Reload to fix UI state
+                  });
                   setState(() {
                     final index = _debts.indexWhere((d) => d.id == debt.id);
                     if (index != -1) _debts[index] = debt.copyWith(isDeleted: true);
@@ -485,9 +515,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     date: DateTime.now(),
                     type: DebtType.owed,
                   );
-                  SupabaseService.addDebt(newDebt).catchError((_) {});
+                  // Добавляем в UI временно (пока грузится)
                   setState(() => _debts.insert(0, newDebt));
                   Navigator.pop(context);
+
+                  SupabaseService.addDebt(newDebt).then((createdDebt) {
+                    setState(() {
+                      final idx = _debts.indexWhere((d) => d.id == newDebt.id);
+                      if (idx != -1) {
+                        _debts[idx] = createdDebt; // Заменяем на версию с ID из БД
+                      }
+                    });
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Долг добавлен'), backgroundColor: Colors.green),
+                      );
+                    }
+                  }).catchError((e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ошибка сохранения: $e'), backgroundColor: Colors.red),
+                      );
+                    }
+                    _loadDebts(); // Перезагружаем для возврата к корректному состоянию
+                  });
                 }
               },
               child: const Text('Сохранить'),
@@ -595,7 +646,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       type: debt.type,
                       isPaid: debt.isPaid,
                     );
-                    SupabaseService.updateDebt(debt.id, updatedDebt.toJson()).catchError((_) {});
+                    SupabaseService.updateDebt(debt.id, updatedDebt.toJson()).then((_) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Изменения сохранены'), backgroundColor: Colors.green),
+                        );
+                      }
+                    }).catchError((e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Ошибка сохранения: $e'), backgroundColor: Colors.red),
+                        );
+                      }
+                      _loadDebts();
+                    });
+                    
                     setState(() {
                       final index = _debts.indexWhere((d) => d.id == debt.id);
                       if (index != -1) _debts[index] = updatedDebt;

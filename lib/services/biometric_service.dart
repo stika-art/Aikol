@@ -30,12 +30,9 @@ class BiometricService {
 
   static Future<bool> authenticate() async {
     try {
+      // Самый простой вызов для максимальной совместимости
       final bool didAuthenticate = await _auth.authenticate(
         localizedReason: 'Подтвердите личность для входа в Aikol',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-        ),
       );
       return didAuthenticate;
     } on PlatformException {
