@@ -1,5 +1,6 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'supabase_service.dart';
 
@@ -8,9 +9,14 @@ class BiometricService {
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static Future<bool> canAuthenticate() async {
-    final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
-    final bool canAuthenticate = canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
-    return canAuthenticate;
+    if (kIsWeb) return false;
+    try {
+      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
+      final bool canAuthenticate = canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
+      return canAuthenticate;
+    } catch (e) {
+      return false;
+    }
   }
 
   static Future<void> saveCredentials(String email, String password) async {
